@@ -1,0 +1,130 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Judge Agent Evaluation Schema v2",
+    "description": "Schema for evaluating agent performance in both open-loop and closed-loop modes",
+    "type": "object",
+    "properties": {
+        "evaluation_mode": {
+            "type": "string",
+            "enum": [
+                "open_loop",
+                "closed_loop"
+            ],
+            "description": "Evaluation mode: open_loop (LLM guided) or closed_loop (injected history)"
+        },
+        "llm_agent_goal": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "Optional goal for the LLM agent. More relevant for open_loop mode"
+        },
+        "customer_script": {
+            "type": "array",
+            "description": "Customer utterances - expected responses for open_loop, exact history for closed_loop",
+            "items": {
+                "type": "string",
+                "minLength": 1
+            },
+            "minItems": 1
+        },
+        "conversation_history": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "description": "Full conversation history for closed_loop mode",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "customer",
+                            "agent"
+                        ]
+                    },
+                    "message": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "role",
+                    "message"
+                ]
+            }
+        },
+        "expected_topic": {
+            "type": "string",
+            "description": "Expected topic that should be triggered"
+        },
+        "expected_action": {
+            "type": "string",
+            "description": "Expected action that should be called"
+        },
+        "expected_args": {
+            "type": "object",
+            "description": "Expected arguments that should be extracted",
+            "additionalProperties": {
+                "oneOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            }
+        },
+        "evaluation_criteria": {
+            "type": "object",
+            "description": "Additional criteria for evaluation",
+            "properties": {
+                "max_turns": {
+                    "type": [
+                        "integer",
+                        "null"
+                    ],
+                    "minimum": 1,
+                    "description": "Maximum number of conversation turns expected"
+                },
+                "required_entity_extraction": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether entity extraction is required for success"
+                }
+            }
+        }
+    },
+    "required": [
+        "evaluation_mode",
+        "customer_script",
+        "expected_topic",
+        "expected_action",
+        "expected_args"
+    ],
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "evaluation_mode": {
+                        "const": "closed_loop"
+                    }
+                }
+            },
+            "then": {
+                "required": [
+                    "conversation_history"
+                ]
+            }
+        }
+    ],
+    "additionalProperties": false
+}

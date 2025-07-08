@@ -1,0 +1,114 @@
+{
+    "examples": [
+        {
+            "name": "Open-loop Flight Booking",
+            "description": "LLM-guided conversation for flight booking",
+            "data": {
+                "evaluation_mode": "open_loop",
+                "llm_agent_goal": "Book a flight from SFO to LAX from August 1 to 8",
+                "expected_topic": "p_16jRZ0000004nyD_Flight_Booking_Assistance",
+                "expected_action": "Book_Flight",
+                "expected_args": {
+                    "fromCity": "SFO",
+                    "toCity": "LAX",
+                    "startDate": "2025-08-01",
+                    "returnDate": "2025-08-08"
+                },
+                "evaluation_criteria": {
+                    "max_turns": 10
+                }
+            }
+        },
+        {
+            "name": "Closed-loop Phone Update",
+            "description": "Predetermined conversation for phone number update. For N+1, we would inject the previous conversation history from the last run.",
+            "data": {
+                "evaluation_mode": "closed_loop",
+                "customer_script": [
+                    "I need to update my phone number",
+                    "My new number is six one seven five five five one two three four"
+                ],
+                "conversation_history": [
+                    {
+                        "role": "customer",
+                        "message": "I need to update my phone number"
+                    },
+                    {
+                        "role": "agent",
+                        "message": "I'd be happy to help you update your phone number. What's your new number?"
+                    },
+                    {
+                        "role": "customer",
+                        "message": "My new number is six one seven five five five one two three four"
+                    },
+                    {
+                        "role": "agent",
+                        "message": "Perfect! I'll update your phone number to 617-555-1234. Let me process that for you."
+                    }
+                ],
+                "expected_topic": "SvcCopilotTmpl__AccountManagement",
+                "expected_action": "SvcCopilotTmpl__UpdateVerifiedContact",
+                "expected_args": {
+                    "newPhoneNumber": "6175551234",
+                    "ContactId": "003RZ000002WUGOYA4"
+                },
+                "evaluation_criteria": {
+                    "max_turns": 5, # If max_turns exceeds the number of customer turns, either terminate or have LLM continue conversation?
+                }
+            }
+        },
+        {
+            "name": "ASR Corruption Test",
+            "description": "Test handling of corrupted speech recognition",
+            "data": {
+                "evaluation_mode": "closed_loop",
+                "customer_script": [
+                    "I want to book a flight from san francisco to loss angeles"
+                ],
+                "conversation_history": [
+                    {
+                        "role": "customer",
+                        "message": "I want to book a flight from san francisco to loss angeles"
+                    },
+                    {
+                        "role": "agent",
+                        "message": "I'd be happy to help you book a flight. I understand you want to go from San Francisco to Los Angeles. What dates are you looking at?"
+                    }
+                ],
+                "expected_topic": "p_16jRZ0000004nyD_Flight_Booking_Assistance",
+                "expected_action": "Book_Flight",
+                "expected_args": {
+                    "fromCity": "SFO",
+                    "toCity": "LAX"
+                },
+                "evaluation_criteria": {
+                    "max_turns": 4
+                }
+            }
+        }
+    ],
+    "invocation_patterns": {
+        "open_loop_flow": {
+            "description": "How to use open loop evaluation",
+            "steps": [
+                "1. Set evaluation_mode to 'open_loop'",
+                "2. Provide llm_agent_goal to guide LLM behavior",
+                "3. customer_script contains expected customer responses",
+                "4. LLM agent drives conversation naturally",
+                "5. Judge evaluates final outcome against expectations",
+                "6. Can simulate multiple conversation paths"
+            ]
+        },
+        "closed_loop_flow": {
+            "description": "How to use closed loop evaluation",
+            "steps": [
+                "1. Set evaluation_mode to 'closed_loop'",
+                "2. Provide full conversation_history",
+                "3. customer_script can be subset for reference",
+                "4. Judge evaluates based on final agent actions",
+                "5. Good for testing specific conversation scenarios",
+                "6. Deterministic evaluation of known conversations"
+            ]
+        }
+    }
+}
