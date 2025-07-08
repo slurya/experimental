@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Judge Agent Evaluation Schema v2",
+    "title": "Judge Agent Evaluation Schema",
     "description": "Schema for evaluating agent performance in both open-loop and closed-loop modes",
     "type": "object",
     "properties": {
